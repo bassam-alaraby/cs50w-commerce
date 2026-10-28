@@ -160,6 +160,9 @@ def view_my_listings(request):
 
 @login_required
 def disable_listing(request, listing_id):
+    if request.method != "POST":
+            return HttpResponse("Method not allowed.", status=405)
+
     try:
         listing = Listing.objects.get(pk=listing_id)
     except Listing.DoesNotExist:

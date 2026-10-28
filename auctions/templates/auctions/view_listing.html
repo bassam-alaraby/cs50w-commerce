@@ -7,7 +7,10 @@
             {% if user == listing.owner %}
                 <p>You are the owner of this listing.</p>
                 {% if listing.is_active %}
-                    <p><a href="{% url 'disable_listing' listing.id %}">Disable this listing</a></p>
+                    <form action="{% url 'disable_listing' listing.id %}" method="post" onsubmit="return confirm('Are you sure you want to disable this listing?');">
+                        {% csrf_token %}
+                        <button type="submit">Disable Listing</button>
+                    </form>
                 {% endif %}
             {% endif %}
         {% else %}
