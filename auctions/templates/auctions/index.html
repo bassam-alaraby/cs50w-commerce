@@ -13,8 +13,13 @@
                         {% endif %}
                         <div>
                             <h5>{{ listing.title }}</h5>
-                            <p>{{ listing.description }}</p>
-                            <p>Price:</strong> ${{ listing.initial_price }}</p>
+                            {% if listing.highest_bid %}
+                                <p><strong>Current Highest Bid:</strong> ${{ listing.highest_bid }}</p>
+                            {% else %}
+                                <p><strong>Initial Price:</strong> ${{ listing.initial_price }}</p>
+                            {% endif %}
+                            <p><strong>Created:</strong> {{ listing.timestamp }}</p>
+                            <a href="{% url 'listing_detail' listing.id %}">View Listing</a>
                         </div>
                     </div>
                 </div>

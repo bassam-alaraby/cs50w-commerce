@@ -1,0 +1,121 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div>
+        {% if user.is_authenticated %}
+            <p>Welcome, {{ user.username }}!</p> 
+            {% if user == listing.owner %}
+                <p>You are the owner of this listing.</p>
+                {% if listing.is_active %}
+                    <p><a href="{% url 'disable_listing' listing.id %}">Disable this listing</a></p>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <p>Please <a href="{% url 'login' %}">log in</a> to your account to be able to bid on this listing.</p>
+        {% endif %}
+    </div>
+    <div>
+        {% if listing.image_url %}
+            <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+        {% endif %}
+        <div>
+            <div>
+                <h5>{{ listing.title }}</h5>
+                {% if message %}
+                    <p><strong>{{ message }}</strong></p>
+                {% endif %}
+                <span>
+                    <!-- Add to Watchlist button -->
+                    {% if user.is_authenticated %}
+                        {% if listing in user.watchlist.all %}
+                            <form action="{% url 'remove_from_watchlist' listing.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit">Remove from Watchlist</button>
+                            </form>
+                        {% else %}
+                            <form action="{% url 'add_to_watchlist' listing.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit">Add to Watchlist</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </span>
+            </div>
+            <p>{{ listing.description }}</p>
+            <p><strong>Created:</strong> {{ listing.timestamp }}</p>
+            <p><strong>Initial Price:</strong> ${{ listing.initial_price }}</p>
+            {% if listing.is_active %}
+                {% if highest_bid %}
+                    <p><strong>Current Highest Bid:</strong> ${{ highest_bid.amount }}</p>
+                {% else %}
+                    <p><strong>No bids yet.</strong></p>
+                {% endif %}
+            {% endif %}
+            {% if not listing.is_active %}
+                <p><strong>Auction Ended</strong></p>
+
+                {% if highest_bid %}
+                    <p>
+                        <strong>Winning Bid:</strong>
+                        ${{ highest_bid.amount }}
+                    </p>
+
+                    {% if is_winner %}
+                        <p>Congratulations! You won this auction.</p>
+                    {% else %}
+                        <p>
+                            <strong>Winner:</strong>
+                            {{ highest_bid.bidder.username }}
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p>This auction has ended with no bids.</p>
+                {% endif %}
+            {% endif %}
+            <!-- Bid form -->
+            {% if user.is_authenticated and listing.is_active and user != listing.owner %}
+                <p><strong>Place a Bid:</strong></p>
+
+                {% if message %}
+                    <p><strong>{{ message }}</strong></p>
+                {% endif %}
+
+                <form action="{% url 'add_bid' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input
+                        type="number"
+                        name="bid_amount"
+                        step="0.01"
+                        min="{{ listing.initial_price }}"
+                        required
+                    >
+                    <button type="submit">Place Bid</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <h3>Comments</h3>
+        <ul>
+            {% for comment in listing.comments.all %}
+                <li>
+                    <strong>{{ comment.author.username }}:</strong>
+                    {{ comment.content }}
+                    <em>({{ comment.timestamp }})</em>
+                </li>
+            {% empty %}
+                <li>No comments yet.</li>
+            {% endfor %}
+        </ul>
+        <!-- Comment form -->
+        {% if user.is_authenticated %}
+            <form action="{% url 'add_comment' listing.id %}" method="post">
+                {% csrf_token %}
+                <textarea name="comment_content" required></textarea>
+                <button type="submit">Add Comment</button>
+            </form>
+        {% else %}
+            <p>Please <a href="{% url 'login' %}">log in</a> to add a comment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

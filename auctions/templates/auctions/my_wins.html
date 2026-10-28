@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+    My Wins
+{% endblock %}
+
+{% block body %}
+    <h1>My Wins</h1>
+
+    <ul>
+        {% for item in won_listings %}
+            <li>
+                <a href="{% url 'listing_detail' item.listing.id %}">
+                    {{ item.listing.title }}
+                </a>
+                — Winning bid: ${{ item.highest_bid.amount }}
+            </li>
+        {% empty %}
+            <li>You haven't won any auctions yet.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
