@@ -1,14 +1,20 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import Listing, User
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    # Display all active listings
+    listings = Listing.objects.filter(is_active=True)
+    return render(request, "auctions/index.html", {
+        "listings": listings
+    })
 
 
 def login_view(request):
@@ -61,3 +67,50 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+
+@login_required
+def create_listing(request):
+    if request.method == "POST":
+        title = request.POST["title"]
+        description = request.POST["description"]
+        category = request.POST.get("category", "")
+        image_url = request.POST.get("image_url", "")
+        initial_price = request.POST["initial_price"]
+
+        # Validate the input data
+        if not title or not description or not initial_price:
+            return render(request, "auctions/create_listing.html", {
+                "message": "Title, description, and initial price are required."
+            })
+
+        try:
+            decimal_initial_price = Listing._meta.get_field("initial_price").clean(
+                initial_price,
+                None
+            )
+        except ValidationError:
+            return render(request, "auctions/create_listing.html", {
+                "message": "Invalid initial price."
+            })
+        
+        # Check if the initial price is a positive number
+        if not decimal_initial_price.is_finite() or decimal_initial_price <= 0:
+            return render(request, "auctions/create_listing.html", {
+                "message": "Initial price must be a positive number."
+            })
+
+        # Create a new listing
+        listing = Listing(
+            title=title,
+            description=description,
+            category=category,
+            image_url=image_url,
+            initial_price=decimal_initial_price,
+            owner=request.user
+        )
+        listing.save()
+
+        return HttpResponseRedirect(reverse("index"))
+    else:
+        return render(request, "auctions/create_listing.html")
