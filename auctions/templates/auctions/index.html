@@ -47,6 +47,8 @@
             {% endfor %}
         </div>
     {% else %}
-        <p class="text-secondary">No active listings available.</p>
+        <div class="d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 65vh;">
+            <p class="fs-4 fw-light text-body-secondary mb-4">No active listings available.</p>
+        </div>
     {% endif %}
 {% endblock %}
