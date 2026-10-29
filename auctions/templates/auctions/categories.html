@@ -7,15 +7,15 @@
 {% block body %}
     <h1>Categories</h1>
 
-    <ul>
+    <div class="list-group">
         {% for category in categories %}
-            <li>
-                <a href="{% url 'category_listings' category %}">
-                    {{ category }}
-                </a>
-            </li>
+            <a href="{% url 'category_listings' category %}" class="list-group-item list-group-item-action">
+                {{ category }}
+            </a>
         {% empty %}
-            <li>No categories available.</li>
+        <div class="d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 65vh;">
+            <p class="fs-4 fw-light text-body-secondary mb-4">No categories available.</p>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}

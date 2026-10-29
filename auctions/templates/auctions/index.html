@@ -4,28 +4,49 @@
     <h2>Active Listings</h2>
 
     {% if listings %}
-        <div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for listing in listings %}
-                <div>
-                    <div>
+                <div class="col">
+                    <div class="card h-100">
                         {% if listing.image_url %}
-                            <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                            <img
+                                src="{{ listing.image_url }}"
+                                class="card-img-top"
+                                alt="{{ listing.title }}"
+                                style="height: 220px; object-fit: contain;"
+                            >
                         {% endif %}
-                        <div>
-                            <h5>{{ listing.title }}</h5>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ listing.title }}</h5>
+
                             {% if listing.highest_bid %}
-                                <p><strong>Current Highest Bid:</strong> ${{ listing.highest_bid }}</p>
+                                <p class="card-text">
+                                    <strong>Current Highest Bid:</strong>
+                                    ${{ listing.highest_bid }}
+                                </p>
                             {% else %}
-                                <p><strong>Initial Price:</strong> ${{ listing.initial_price }}</p>
+                                <p class="card-text">
+                                    <strong>Initial Price:</strong>
+                                    ${{ listing.initial_price }}
+                                </p>
                             {% endif %}
-                            <p><strong>Created:</strong> {{ listing.timestamp }}</p>
-                            <a href="{% url 'listing_detail' listing.id %}">View Listing</a>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                            <small class="text-body-secondary">
+                                {{ listing.timestamp|date:"M d, Y" }}
+                            </small>
+                            <a
+                                href="{% url 'listing_detail' listing.id %}"
+                                class="btn btn-primary btn-sm"
+                            >
+                                View Listing
+                            </a>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>No active listings available.</p>
+        <p class="text-secondary">No active listings available.</p>
     {% endif %}
 {% endblock %}
